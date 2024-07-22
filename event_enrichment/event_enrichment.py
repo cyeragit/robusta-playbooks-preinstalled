@@ -1,4 +1,5 @@
 import logging
+import json
 
 from jinja2 import Template
 from typing import Dict, Any
@@ -19,7 +20,7 @@ class PodLabelTemplate(ActionParams):
 def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
     logger.info(f"Enriching event with pod labels")
     try:
-        logger.info(f"Event: {event.__dict__}")
+        logger.info(f"Event: {json.dumps(event)}")
     except Exception as e:
         logger.error(f"Failed to log event: {e}")
 
