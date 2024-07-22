@@ -55,12 +55,21 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
         logger.info("Event is not regarding a pod, cronjob or a job, skipping")
         return
 
+    logger.info("====================== relevant_event_obj ========================")
+    logger.info(relevant_event_obj)
+    logger.info("=========================================================")
+
+
     labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
     labels.update(relevant_event_obj.metadata.labels)
     labels.update(relevant_event_obj.metadata.annotations)
     labels["name"] = relevant_event_obj.metadata.name
     labels["namespace"] = relevant_event_obj.metadata.namespace
     template = Template(params.template)
+
+    logger.info("====================== template ========================")
+    logger.info(template)
+    logger.info("=========================================================")
 
     event.add_enrichment(
         [MarkdownBlock(template.safe_substitute(labels))],
