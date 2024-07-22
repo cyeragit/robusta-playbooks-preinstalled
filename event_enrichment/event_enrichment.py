@@ -1,5 +1,4 @@
 import logging
-import json
 
 from string import Template
 from typing import Dict, Any
