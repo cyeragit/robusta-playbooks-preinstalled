@@ -4,7 +4,7 @@ import json
 from jinja2 import Template
 from typing import Dict, Any
 from collections import defaultdict
-from hikaru.model.rel_1_26.v1 import Pod
+from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
 from robusta.api import action, ActionParams, EventChangeEvent, MarkdownBlock
 
 
@@ -36,16 +36,30 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
     #     logger.info("Event is not regarding a pod / cronjob, skipping")
     #     return
 
-    pod = Pod.readNamespacedPod(name=event.obj.regarding.name, namespace=event.obj.regarding.namespace).obj
-    if not pod:
-        logger.info("Pod not found, skipping")
+    if event.obj.regarding.kind == "Pod":
+        relevant_event_obj = Pod.readNamespacedPod(name=event.obj.regarding.name, namespace=event.obj.regarding.namespace).obj
+        if not relevant_event_obj:
+            logger.info("Pod not found, skipping")
+            return
+    elif event.obj.regarding.kind == "CronJob":
+        relevant_event_obj = CronJob.readNamespacedCronJob(name=event.obj.regarding.name, namespace=event.obj.regarding.namespace).obj
+        if not relevant_event_obj:
+            logger.info("CronJob not found, skipping")
+            return
+    elif event.obj.regarding.kind == "Job":
+        relevant_event_obj = Job.readNamespacedJob(name=event.obj.regarding.name, namespace=event.obj.regarding.namespace).obj
+        if not relevant_event_obj:
+            logger.info("Job not found, skipping")
+            return
+    else:
+        logger.info("Event is not regarding a pod, cronjob or a job, skipping")
         return
 
     labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
-    labels.update(pod.metadata.labels)
-    labels.update(pod.metadata.annotations)
-    labels["name"] = pod.metadata.name
-    labels["namespace"] = pod.metadata.namespace
+    labels.update(relevant_event_obj.metadata.labels)
+    labels.update(relevant_event_obj.metadata.annotations)
+    labels["name"] = relevant_event_obj.metadata.name
+    labels["namespace"] = relevant_event_obj.metadata.namespace
     template = Template(params.template)
 
     event.add_enrichment(
