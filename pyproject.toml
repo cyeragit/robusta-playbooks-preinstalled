@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "robusta-playbooks"
+version = "0.1.0"
+description = ""
+authors = ["Daniel Adler <daniela@cyera.io>"]
+readme = "README.md"
+packages = [{include = "robusta_playbooks"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+robusta-api = "^0.14.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
