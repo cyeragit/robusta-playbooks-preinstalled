@@ -17,12 +17,15 @@ class PodLabelTemplate(ActionParams):
 
 @action
 def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
+    logger.info(f"Enriching event with pod labels")
 
     if not event.obj.regarding.kind == "Pod":
+        logger.info("Event is not regarding a pod, skipping")
         return
 
     pod = Pod.readNamespacedPod(name=event.obj.regarding.name, namespace=event.obj.regarding.namespace).obj
     if not pod:
+        logger.info("Pod not found, skipping")
         return
 
     labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
