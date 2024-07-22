@@ -19,18 +19,6 @@ class PodLabelTemplate(ActionParams):
 @action
 def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
     logger.info(f"Enriching event with pod labels")
-    try:
-        logger.info("======================== event.obj ======================")
-        logger.info(f"Event: {event.obj}")
-        logger.info("=========================================================")
-        logger.info("====================== event.obj.regarding ========================")
-        logger.info(f"Event: {event.obj.regarding}")
-        logger.info("=========================================================")
-        logger.info("====================== event.obj.regarding.kind ========================")
-        logger.info(f"Event: {event.obj.regarding.kind}")
-        logger.info("=========================================================")
-    except Exception as e:
-        logger.error(f"Failed to log event: {e}")
 
     relevant_event_obj = None
 
@@ -45,24 +33,12 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
         logger.info("Pod not found, skipping")
         return
 
-    logger.info("====================== relevant_event_obj ========================")
-    logger.info(relevant_event_obj)
-    logger.info("=========================================================")
-
     labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
     labels.update(relevant_event_obj.metadata.labels)
     labels.update(relevant_event_obj.metadata.annotations)
     labels["name"] = relevant_event_obj.metadata.name
     labels["namespace"] = relevant_event_obj.metadata.namespace
     template = Template(params.template)
-
-    logger.info("====================== labels ========================")
-    logger.info(labels)
-    logger.info("=========================================================")
-
-    logger.info("====================== template ========================")
-    logger.info(template)
-    logger.info("=========================================================")
 
     event.add_enrichment(
         [MarkdownBlock(template.safe_substitute(labels))],
