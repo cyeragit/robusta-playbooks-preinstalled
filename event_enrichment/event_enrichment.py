@@ -18,6 +18,7 @@ class PodLabelTemplate(ActionParams):
 @action
 def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
     logger.info(f"Enriching event with pod labels")
+    logger.info(f"Event: {event}")
 
     if not event.obj.regarding.kind == "Pod" or not event.obj.regarding.kind == "CronJob":
         logger.info("Event is not regarding a pod / cronjob, skipping")
