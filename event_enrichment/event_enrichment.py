@@ -39,6 +39,10 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
     labels["namespace"] = relevant_event_obj.metadata.namespace
     template = Template(params.template)
 
+    for sink in event.named_sinks:
+        for finding in event.sink_findings[sink]:
+            finding.subject.labels.update(labels)
+
     event.add_enrichment(
         [MarkdownBlock(template.safe_substitute(labels))],
     )
