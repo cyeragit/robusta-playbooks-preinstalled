@@ -25,6 +25,30 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
         relevant_event_obj = Pod.readNamespacedPod(name=event.obj.regarding.name, namespace=event.obj.regarding.namespace).obj
     elif event.obj.regarding.kind == "CronJob":
         relevant_event_obj = CronJob.readNamespacedCronJob(name=event.obj.regarding.name, namespace=event.obj.regarding.namespace).obj
+        try:
+            logger.info('================================ CronJob ==================================')
+            logger.info(relevant_event_obj)
+            logger.info('==================================================================')
+            logger.info('================================ CronJob.spec ==================================')
+            logger.info(relevant_event_obj.spec)
+            logger.info('==================================================================')
+            logger.info('================================ CronJob.spec.jobTemplate ==================================')
+            logger.info(relevant_event_obj.spec.jobTemplate)
+            logger.info('==================================================================')
+            logger.info('================================ CronJob.spec.jobTemplate.spec ==================================')
+            logger.info(relevant_event_obj.spec.jobTemplate.spec)
+            logger.info('==================================================================')
+            logger.info('================================ CronJob.spec.jobTemplate.spec.template ==================================')
+            logger.info(relevant_event_obj.spec.jobTemplate.spec.template)
+            logger.info('==================================================================')
+            logger.info('================================ CronJob.spec.jobTemplate.spec.template.metadata ===============================')
+            logger.info(relevant_event_obj.spec.jobTemplate.spec.template.metadata)
+            logger.info('==================================================================')
+            logger.info('=========================== CronJob.spec.jobTemplate.spec.template.metadata.labels =============================')
+            logger.info(relevant_event_obj.spec.jobTemplate.spec.template.metadata.labels)
+            logger.info('==================================================================')
+        except Exception as e:
+            logger.error(e)
     elif event.obj.regarding.kind == "Job":
         relevant_event_obj = Job.readNamespacedJob(name=event.obj.regarding.name, namespace=event.obj.regarding.namespace).obj
 
