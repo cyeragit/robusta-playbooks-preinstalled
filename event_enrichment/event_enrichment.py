@@ -32,6 +32,8 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
         logger.info("Pod not found, skipping")
         return
 
+    logger.info(f"Pod found, enriching with labels -> {relevant_event_obj.metadata.labels}")
+
     labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
     labels.update(relevant_event_obj.metadata.labels)
     labels.update(relevant_event_obj.metadata.annotations)
