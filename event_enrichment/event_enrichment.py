@@ -17,7 +17,7 @@ class PodLabelTemplate(ActionParams):
 
 @action
 def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
-    logger.info(f"Enriching event with pod labels")
+    logger.info(f"Enriching event with pod labels -> {event.obj.regarding.kind} - {event.obj.regarding.name} - {event.obj.regarding.namespace}")
 
     relevant_event_obj = None
 
