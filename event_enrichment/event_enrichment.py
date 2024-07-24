@@ -32,6 +32,15 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
             logger.info('================================ CronJob.spec ==================================')
             logger.info(relevant_event_obj.spec)
             logger.info('==================================================================')
+            logger.info('================================ CronJob.spec.jobTemplate ==================================')
+            logger.info(relevant_event_obj.spec.jobTemplate)
+            logger.info('==================================================================')
+            logger.info('================================ CronJob.spec.jobTemplate.metadata ==================================')
+            logger.info(relevant_event_obj.spec.jobTemplate.metadata)
+            logger.info('==================================================================')
+            logger.info('================================ CronJob.spec.jobTemplate.metadata.labels ==================================')
+            logger.info(relevant_event_obj.spec.jobTemplate.metadata.labels)
+            logger.info('==================================================================')
         except Exception as e:
             logger.error(e)
     elif event.obj.regarding.kind == "Job":
