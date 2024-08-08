@@ -66,8 +66,11 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
 
 @action
 def alert_job_labels_enricher(event: JobChangeEvent):
-    logger.info(f"Enriching alert with job labels -> {event.obj}")
-    logger.info(f"Enriching alert with job labels -> {event.obj.metadata.labels}")
+
+    if event.obj.metadata.namespace == 'qualys':
+        return  # skip enriching alerts from the qualys namespace
+
+    logger.info(f"Enriching JobChangeEvent event with job labels -> {event.obj}")
     # job = alert.get_job()
     # if not job:
     #     logging.info("alert doesn't have a job")
