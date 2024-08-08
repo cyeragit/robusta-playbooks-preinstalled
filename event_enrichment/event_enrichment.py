@@ -1,10 +1,9 @@
-import logging
-
-from string import Template
-from typing import Dict, Any
-from collections import defaultdict
+from robusta.api import action, ActionParams, EventChangeEvent, MarkdownBlock, PrometheusKubernetesAlert
 from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
-from robusta.api import action, ActionParams, EventChangeEvent, MarkdownBlock
+from collections import defaultdict
+from typing import Dict, Any
+from string import Template
+import logging
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -63,3 +62,18 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
     event.add_enrichment(
         [MarkdownBlock(template.safe_substitute(labels))],
     )
+
+
+@action
+def alert_job_labels_enricher(alert: PrometheusKubernetesAlert):
+    job = alert.get_job()
+    if not job:
+        logging.info("alert doesn't have a job")
+        return
+
+    job_labels = job.metadata.labels
+    logger.info(f"Enriching alert with job labels -> {job_labels}")
+
+    for sink in alert.named_sinks:
+        for finding in alert.sink_findings[sink]:
+            finding.subject.labels.update(job_labels)
