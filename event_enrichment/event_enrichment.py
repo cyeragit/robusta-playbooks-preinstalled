@@ -67,14 +67,20 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
 @action
 def alert_job_labels_enricher(event: JobChangeEvent):
     logger.info(f"Enriching JobChangeEvent event with job labels")
+    logger.info(f"EVENT OBJECT -> {event.obj}")
+    logger.info(f"EVENT OBJECT METADATA -> {event.obj.metadata}")
+    try:
+        logger.info(f"AS DICT -> {event.__dict__}")
+    except Exception as e:
+        logger.error(f"ERROR AS DICT -> {e}")
     event_labels = event.obj.metadata.labels.update(event.obj.metadata.labels)
 
     logger.info(f"Enriching alert with job labels -> {event_labels}")
 
-    labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
-    labels.update(event_labels)
-
     if event_labels:
+        labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
+        labels.update(event_labels)
+
         for sink in event.named_sinks:
             for finding in event.sink_findings[sink]:
                 finding.subject.labels.update(labels)
