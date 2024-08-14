@@ -1,7 +1,7 @@
-from robusta.api import action, ActionParams, EventChangeEvent, MarkdownBlock, PrometheusKubernetesAlert, JobChangeEvent
+from robusta.api import action, ActionParams, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, RobustaPod
 from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
+from typing import Dict, Any, List, Tuple
 from collections import defaultdict
-from typing import Dict, Any
 from string import Template
 import logging
 
@@ -67,21 +67,65 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
 @action
 def alert_job_labels_enricher(event: JobChangeEvent):
     logger.info(f"Enriching JobChangeEvent event with job labels")
+    logger.info(f"Event -> {event}")
+    logger.info("=====================================")
+    logger.info("=====================================")
+    try:
+        logger.info(f"Event as dict -> {event.__dict__}")
+        logger.info("=====================================")
+        logger.info("=====================================")
+    except Exception as e:
+        logger.error(f"Error converting event to dict -> {e}")
 
     job = event.get_job()
     if not job:
         logging.error(f"Cannot run alert_job_labels_enricher on event with no job: {event}")
         return
 
-    job_labels = job.metadata.labels
-    logger.info(f"Job labels -> {job_labels}")
+    job_status: JobStatus = job.status
+    status, message = __job_status_str(job_status)
+    job_rows: List[List[str]] = [["status", status]]
+    if message:
+        job_rows.append(["message", message])
 
-    if job_labels:
-        labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
-        labels.update(job_labels)
+    try:
+        job_labels = [[key, value] for key, value in job.metadata.labels.items()]
+    except Exception as e:
+        logging.error(f"Error getting job labels -> {e}")
+        job_labels = []
 
-        logger.info(f"Enriching job alert with labels -> {labels}")
+    job_rows.append(["name", job.metadata.name])
+    # job_rows.append(["image", container.image])
 
-        for sink in event.named_sinks:
-            for finding in event.sink_findings[sink]:
-                finding.subject.labels.update(labels)
+    job_rows.extend(job_labels)
+
+    table_block = TableBlock(
+        job_rows,
+        ["description", "value"],
+        table_name="*Job information*",
+    )
+    event.add_enrichment([table_block])
+
+    # if job_labels:
+    #     labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
+    #     labels.update(job_labels)
+    #
+    #     logger.info(f"Enriching job alert with labels -> {labels}")
+    #
+    #     for sink in event.named_sinks:
+    #         for finding in event.sink_findings[sink]:
+    #             finding.subject.labels.update(labels)
+
+
+def __job_status_str(job_status: JobStatus) -> Tuple[str, str]:
+    if job_status.active:
+        return "Running", ""
+
+    for condition in job_status.conditions:
+        if condition.status == "True":
+            return condition.type, condition.message
+
+    if not any([job_status.active, job_status.failed, job_status.succeeded, job_status.conditions]):
+        return "Starting", ""
+
+    return "Unknown", ""
