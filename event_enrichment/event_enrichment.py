@@ -77,9 +77,10 @@ def alert_job_labels_enricher(event: JobChangeEvent):
     logger.info(f"Job labels -> {job_labels}")
 
     if job_labels:
-        logger.info(f"Enriching job alert with labels -> {job_labels}")
         labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
         labels.update(job_labels)
+
+        logger.info(f"Enriching job alert with labels -> {labels}")
 
         for sink in event.named_sinks:
             for finding in event.sink_findings[sink]:
