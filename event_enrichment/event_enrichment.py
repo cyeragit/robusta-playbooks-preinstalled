@@ -67,8 +67,6 @@ def event_pod_label_enricher(event: EventChangeEvent, params: PodLabelTemplate):
 @action
 def alert_job_labels_enricher(event: JobChangeEvent):
     logger.info(f"Enriching JobChangeEvent event with job labels")
-    logger.info(f"EVENT OBJECT -> {event.obj}")
-    logger.info(f"EVENT OBJECT METADATA -> {event.obj.metadata}")
 
     job = event.get_job()
     if not job:
