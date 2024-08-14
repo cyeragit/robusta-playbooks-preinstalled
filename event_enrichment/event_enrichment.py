@@ -1,6 +1,6 @@
 from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, RobustaPod
 from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Union
 from collections import defaultdict
 from string import Template
 import logging
@@ -14,7 +14,7 @@ class PodLabelTemplate(ActionParams):
     template: str
 
 
-def get_cluster_name(event: EventChangeEvent):
+def get_cluster_name(event: Union[EventChangeEvent, JobChangeEvent]) -> Union[str, None]:
     for sink in event.all_sinks.values():
         cluster_name = sink.registry.get_global_config().get("cluster_name")
         if cluster_name:
@@ -101,6 +101,13 @@ def alert_job_labels_enricher(event: JobChangeEvent):
         table_name="*Job information*",
     )
     event.add_enrichment([table_block])
+
+    cluster_name = get_cluster_name(event)
+
+    for sink in event.named_sinks:
+        for finding in event.sink_findings[sink]:
+            if cluster_name:
+                finding.subject.labels.update({"cluster": cluster_name})
 
 
 def __job_status_str(job_status: JobStatus) -> Tuple[str, str]:
