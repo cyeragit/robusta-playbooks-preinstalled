@@ -69,17 +69,19 @@ def alert_job_labels_enricher(event: JobChangeEvent):
     logger.info(f"Enriching JobChangeEvent event with job labels")
     logger.info(f"EVENT OBJECT -> {event.obj}")
     logger.info(f"EVENT OBJECT METADATA -> {event.obj.metadata}")
-    try:
-        logger.info(f"AS DICT -> {event.__dict__}")
-    except Exception as e:
-        logger.error(f"ERROR AS DICT -> {e}")
-    event_labels = event.obj.metadata.labels.update(event.obj.metadata.labels)
 
-    logger.info(f"Enriching alert with job labels -> {event_labels}")
+    job = event.get_job()
+    if not job:
+        logging.error(f"Cannot run alert_job_labels_enricher on event with no job: {event}")
+        return
 
-    if event_labels:
+    job_labels = job.metadata.labels
+    logger.info(f"Job labels -> {job_labels}")
+
+    if job_labels:
+        logger.info(f"Enriching job alert with labels -> {job_labels}")
         labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
-        labels.update(event_labels)
+        labels.update(job_labels)
 
         for sink in event.named_sinks:
             for finding in event.sink_findings[sink]:
