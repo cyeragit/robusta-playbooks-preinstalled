@@ -81,16 +81,19 @@ def alert_job_labels_enricher(event: JobChangeEvent):
         job_rows.append(["message", message])
 
     try:
-        job_labels = __get_event_labels(job.metadata.labels, job_labels_keys_to_enrich)
-        job_rows.extend(job_labels)
+        job_labels = [[key, value] for key, value in job.metadata.labels.items() if key in job_labels_keys_to_enrich]
         image = job.get_single_pod().get_images()
-        if image:
-            job_rows.append(["image", str(image)])
     except Exception as e:
         logging.error(f"Error getting job labels -> {e}")
+        job_labels = []
+        image = None
 
-    job_rows.append(["Name", job.metadata.name])
-    job_rows.append(["Namespace", job.metadata.namespace])
+    job_rows.append(["name", job.metadata.name])
+    job_rows.append(["namespace", job.metadata.namespace])
+    if image:
+        job_rows.append(["image", str(image)])
+
+    job_rows.extend(job_labels)
 
     table_block = TableBlock(
         job_rows,
