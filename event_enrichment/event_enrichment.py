@@ -14,7 +14,7 @@ class PodLabelTemplate(ActionParams):
     template: str
 
 
-def get_cluster_name(event: Union[EventChangeEvent, JobChangeEvent]) -> Union[str, None]:
+def get_cluster_name(event: Union[EventChangeEvent, JobChangeEvent, PodEvent]) -> Union[str, None]:
     for sink in event.all_sinks.values():
         cluster_name = sink.registry.get_global_config().get("cluster_name")
         if cluster_name:
