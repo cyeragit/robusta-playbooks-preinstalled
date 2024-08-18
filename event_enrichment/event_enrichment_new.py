@@ -13,13 +13,17 @@ logger = logging.getLogger(__name__)
 def event_change_event_enricher(event: EventChangeEvent):
     logger.info(f"Enriching EventChangeEvent with object labels")
 
+    logger.info(event)
+
     __enrich_event_with_cluster_name(event)
     if not event.obj:
         logger.info("Job related object not found, skipping")
         return
 
     alert_table_block_rows = __create_alert_table_block_rows(event)
+    logger.info(alert_table_block_rows)
     alert_summary_table = __create_alert_table_block("Alert Summary", alert_table_block_rows)
+    logger.info(alert_summary_table)
 
     event.add_enrichment([alert_summary_table])
     # relevant_event_obj = None
