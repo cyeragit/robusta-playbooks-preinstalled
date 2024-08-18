@@ -118,5 +118,6 @@ def __create_alert_table_block_rows(event: Union[EventChangeEvent, JobChangeEven
 def __create_alert_table_block(table_name: str, table_rows: List[List[str]]) -> TableBlock:
     return TableBlock(
         table_name=table_name,
+        headers=["Description", "Value"],
         rows=table_rows,
     )
