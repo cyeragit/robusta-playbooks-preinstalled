@@ -154,7 +154,7 @@ def policy_violation_enricher(event: EventChangeEvent):
     print(event.obj.related)
 
     job_rows: List[List[str]] = [
-        ["Name", event.obj.related.name],
+        ["Pod", event.obj.related.name],
         ["Namespace", event.obj.related.namespace]]
 
     table_block = TableBlock(
