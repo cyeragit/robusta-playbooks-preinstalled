@@ -150,6 +150,7 @@ def pod_oom_killed_enricher(event: PodEvent):
 def policy_violation_enricher(event: EventChangeEvent):
     if not event.obj or not event.obj.related:
         return
+    print(event.obj.related)
     labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
     labels["name"] = event.obj.related.name
     labels["namespace"] = event.obj.related.namespace
