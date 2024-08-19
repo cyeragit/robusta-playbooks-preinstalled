@@ -150,14 +150,19 @@ def pod_oom_killed_enricher(event: PodEvent):
 def policy_violation_enricher(event: EventChangeEvent):
     if not event.obj or not event.obj.related:
         return
+        
     print(event.obj.related)
-    labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
-    labels["name"] = event.obj.related.name
-    labels["namespace"] = event.obj.related.namespace
 
-    for sink in event.named_sinks:
-        for finding in event.sink_findings[sink]:
-            finding.subject.labels.update(labels)
+    job_rows: List[List[str]] = [
+        ["Name", event.obj.related.name],
+        ["Namespace", event.obj.related.namespace]]
+
+    table_block = TableBlock(
+        job_rows,
+        ["description", "value"],
+        table_name="*Alert information*",
+    )
+    event.add_enrichment([table_block])
 
 
 def __job_status_str(job_status: JobStatus) -> Tuple[str, str]:
