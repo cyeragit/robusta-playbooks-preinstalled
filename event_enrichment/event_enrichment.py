@@ -146,6 +146,19 @@ def pod_oom_killed_enricher(event: PodEvent):
                 finding.subject.labels.update({"cluster": cluster_name})
 
 
+@action
+def policy_violation_enricher(event: EventChangeEvent):
+    if not event.obj or not event.obj.related:
+        return
+    labels: Dict[str, Any] = defaultdict(lambda: "<missing>")
+    labels["name"] = event.obj.related.name
+    labels["namespace"] = event.obj.related.namespace
+
+    for sink in event.named_sinks:
+        for finding in event.sink_findings[sink]:
+            finding.subject.labels.update(labels)
+
+
 def __job_status_str(job_status: JobStatus) -> Tuple[str, str]:
     if job_status.active:
         return "Running", ""
