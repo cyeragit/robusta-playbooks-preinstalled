@@ -150,8 +150,6 @@ def pod_oom_killed_enricher(event: PodEvent):
 def policy_violation_enricher(event: EventChangeEvent):
     if not event.obj or not event.obj.related:
         return
-        
-    print(event.obj.related)
 
     job_rows: List[List[str]] = [
         ["Name", event.obj.related.name],
