@@ -150,6 +150,7 @@ def pod_oom_killed_enricher(event: PodEvent):
 
 @action
 def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
+    logger.info("Enriching event with job log match silence")
     job = event.get_job()
     if not job:
         logging.error(f"cannot run job_pod_enricher on alert with no job object: {event}")
