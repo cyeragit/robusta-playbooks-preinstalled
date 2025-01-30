@@ -1,8 +1,9 @@
-from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, PodEvent, RobustaPod
+from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, PodEvent, RobustaPod, JobEvent
 from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
 from typing import Dict, Any, List, Tuple, Union
 from collections import defaultdict
 from string import Template
+from typing import List, Optional
 import logging
 
 
@@ -13,6 +14,8 @@ logger = logging.getLogger(__name__)
 class PodLabelTemplate(ActionParams):
     template: str
 
+class JobPodTextMatch(ActionParams):
+    text_regex: str
 
 def get_cluster_name(event: Union[EventChangeEvent, JobChangeEvent, PodEvent]) -> Union[str, None]:
     for sink in event.all_sinks.values():
@@ -145,6 +148,27 @@ def pod_oom_killed_enricher(event: PodEvent):
             if cluster_name:
                 finding.subject.labels.update({"cluster": cluster_name})
 
+@action
+def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
+    logger.info("Enriching event with job log match silence")
+    job = event.get_job()
+    if not job:
+        logging.error(f"cannot run job_pod_enricher on alert with no job object: {event}")
+        return
+
+    pod = _get_job_latest_pod(job)
+
+    if not pod:
+        logging.info(f"No pods for job {job.metadata.namespace}/{job.metadata.name}")
+        return
+    print(pod.get_logs())
+    log_data = pod.get_logs(
+        filter_regex=params.text_regex,
+    )
+    print(log_data)
+    if log_data:
+        event.stop_processing = True
+
 
 @action
 def policy_violation_enricher(event: EventChangeEvent):
@@ -182,3 +206,15 @@ def __get_event_labels(event_labels: Dict, wanted_labels: List[str]) -> List[Lis
     except Exception as e:
         logger.error(f"Error getting job labels -> {e}")
         return []
+
+
+def _get_job_all_pods(job: Job) -> Optional[List[RobustaPod]]:
+    if not job:
+        return None
+
+def _get_job_latest_pod(job: Job) -> Optional[RobustaPod]:
+    pod_list: List[RobustaPod] = _get_job_all_pods(job)
+    if not pod_list:
+        return None
+    pod_list.sort(key=lambda pod: pod.status.startTime, reverse=True)
+    return pod_list[0] if pod_list else None
