@@ -1,4 +1,4 @@
-from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, PodEvent, RobustaPod, JobEvent, get_job_latest_pod
+from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, PodEvent, RobustaPod, JobEvent, get_job_latest_pod, ContainerInfo
 from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
 from typing import Dict, Any, List, Tuple, Union
 from collections import defaultdict
@@ -168,7 +168,8 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
         filter_regex=params.text_regex,
     )
     logger.info(f"log: {pod.get_logs()}")
-    job_status: JobStatus = job.status
+    job_status: JobStatus = job.status.con
+    logger.info(f"JobStatus: {job_status}")
     status, message = __job_status_str(job_status)
     logger.info(f"JobStatus: {status}")
     logger.info(f"JobMessage: {message}")
