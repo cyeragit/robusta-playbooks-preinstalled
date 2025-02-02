@@ -1,4 +1,4 @@
-from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, PodEvent, RobustaPod, JobEvent
+from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, PodEvent, RobustaPod, JobEvent, get_job_latest_pod
 from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
 from typing import Dict, Any, List, Tuple, Union
 from collections import defaultdict
@@ -159,7 +159,7 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
         logging.error(f"cannot run job_pod_enricher on alert with no job object: {event}")
         return
 
-    pod = _get_job_latest_pod(job)
+    pod = get_job_latest_pod(job)
     logger.info(pod)
     logger.info(pod.get_logs())
     if not pod:
@@ -210,15 +210,3 @@ def __get_event_labels(event_labels: Dict, wanted_labels: List[str]) -> List[Lis
     except Exception as e:
         logger.error(f"Error getting job labels -> {e}")
         return []
-
-
-def _get_job_all_pods(job: Job) -> Optional[List[RobustaPod]]:
-    if not job:
-        return None
-
-def _get_job_latest_pod(job: Job) -> Optional[RobustaPod]:
-    pod_list: List[RobustaPod] = _get_job_all_pods(job)
-    if not pod_list:
-        return None
-    pod_list.sort(key=lambda pod: pod.status.startTime, reverse=True)
-    return pod_list[0] if pod_list else None
