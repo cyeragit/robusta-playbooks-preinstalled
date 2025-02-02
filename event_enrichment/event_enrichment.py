@@ -161,15 +161,14 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
 
     pod = get_job_latest_pod(job)
     logger.info(pod)
-    logger.info(pod.get_logs())
     if not pod:
         logging.info(f"No pods for job {job.metadata.namespace}/{job.metadata.name}")
         return
-    logger.info(pod.get_logs())
     log_data = pod.get_logs(
         filter_regex=params.text_regex,
     )
-    logger.info(log_data)
+    logger.info(f"pod data: {pod}")
+    logger.info(f"log data: {log_data}")
     if log_data:
         event.stop_processing = True
 
