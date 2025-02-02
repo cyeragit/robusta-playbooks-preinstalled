@@ -168,6 +168,10 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
         filter_regex=params.text_regex,
     )
     logger.info(f"log: {pod.get_logs()}")
+    job_status: JobStatus = job.status
+    status, message = __job_status_str(job_status)
+    logger.info(f"JobStatus: {status}")
+    logger.info(f"JobMessage: {message}")
     logger.info(f"pod data: {pod}")
     logger.info(f"log: {pod.get_logs()}")
     logger.info(f"log data: {log_data}")
