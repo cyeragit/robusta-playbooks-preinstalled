@@ -1,4 +1,4 @@
-from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, PodEvent, RobustaPod, JobEvent, get_job_latest_pod, ContainerInfo
+from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, PodEvent, RobustaPod, JobEvent, get_job_latest_pod, get_job
 from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
 from typing import Dict, Any, List, Tuple, Union
 from collections import defaultdict
@@ -151,8 +151,6 @@ def pod_oom_killed_enricher(event: PodEvent):
 @action
 def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
     logger.info("Enriching event with job log match silence")
-    logger.info(event)
-    logger.info(event.get_job())
     job = event.get_job()
 
     if not job:
@@ -164,19 +162,17 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
     if not pod:
         logging.info(f"No pods for job {job.metadata.namespace}/{job.metadata.name}")
         return
+
+    all_statuses = pod.status.containerStatuses + pod.status.initContainerStatuses
+    logger.info(f"all statuses: {all_statuses}")
     log_data = pod.get_logs(
         filter_regex=params.text_regex,
     )
-    logger.info(f"log: {pod.get_logs()}")
-    job_status: JobStatus = job.status.con
-    logger.info(f"JobStatus: {job_status}")
-    status, message = __job_status_str(job_status)
-    logger.info(f"JobStatus: {status}")
-    logger.info(f"JobMessage: {message}")
     logger.info(f"pod data: {pod}")
     logger.info(f"log: {pod.get_logs()}")
     logger.info(f"log data: {log_data}")
     if log_data:
+        event.override_finding_attributes(aggregation_key="JobSilence")
         event.stop_processing = True
 
 
