@@ -1,4 +1,4 @@
-from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, PodEvent, RobustaPod, JobEvent, get_job_latest_pod, get_job
+from robusta.api import action, ActionParams, RobustaJob, EventChangeEvent, MarkdownBlock, JobChangeEvent, JobStatus, TableBlock, PodEvent, RobustaPod, JobEvent, get_job_latest_pod
 from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
 from typing import Dict, Any, List, Tuple, Union
 from collections import defaultdict
