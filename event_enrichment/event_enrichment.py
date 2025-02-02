@@ -154,12 +154,14 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
     logger.info(event)
     logger.info(event.get_job())
     job = event.get_job()
+
     if not job:
         logging.error(f"cannot run job_pod_enricher on alert with no job object: {event}")
         return
 
     pod = _get_job_latest_pod(job)
-
+    logger.info(pod)
+    logger.info(pod.get_logs())
     if not pod:
         logging.info(f"No pods for job {job.metadata.namespace}/{job.metadata.name}")
         return
