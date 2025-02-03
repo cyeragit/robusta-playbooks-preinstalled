@@ -1,4 +1,3 @@
-from ansible_collections.community.general.plugins.modules.rax_files import container
 from robusta.api import (
     action,
     ActionParams,
