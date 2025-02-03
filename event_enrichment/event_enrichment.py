@@ -179,6 +179,11 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
         logger.info(f"container status: {container_status}")
     except Exception as e:
         logging.error(f"Error getting container status -> {e}")
+    try:
+        test = pod.status.containerStatuses[0].state.terminated.containerID
+        logger.info(f"test: {test}")
+    except Exception as e:
+        logging.error(f"Error getting container status -> {e}")
     all_statuses = pod.status.containerStatuses + pod.status.initContainerStatuses
     logger.info(f"  pod.status.containerStatuses: {pod.status.containerStatuses}")
     logger.info(f"  pod.status.initContainerStatuses: {pod.status.initContainerStatuses}")
