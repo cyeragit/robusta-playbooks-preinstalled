@@ -11,6 +11,7 @@ from robusta.api import (
     RobustaPod,
     JobEvent,
     get_job_latest_pod,
+    Finding
 )
 from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
 from typing import Dict, Any, List, Tuple, Union
@@ -188,6 +189,8 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
 
     if "failed to create containerd" in message:
         event.override_finding_attributes(aggregation_key="JobSilence")
+        finding = Finding(title="JobSilence", description="Silencing job with log match", aggregation_key="JobSilence")
+        event.add_finding(finding)
         logger.info(f"Silencing event with log match -> {params.text_regex}")
 
 
