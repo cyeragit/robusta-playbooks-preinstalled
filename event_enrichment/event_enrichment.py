@@ -1,3 +1,4 @@
+from ansible_collections.community.general.plugins.modules.rax_files import container
 from robusta.api import (
     action,
     ActionParams,
@@ -170,35 +171,25 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
         return
 
     pod = get_job_latest_pod(job)
-    logger.info(pod)
     if not pod:
         logging.info(f"No pods for job {job.metadata.namespace}/{job.metadata.name}")
         return
-    try:
-        container_status = pod.status.containerStatuses[0].containerID
-        logger.info(f"container status: {container_status}")
-    except Exception as e:
-        logging.error(f"Error getting container status -> {e}")
-    try:
-        test = pod.status.containerStatuses[0].state.terminated.containerID
-        logger.info(f"test: {test}")
-    except Exception as e:
-        logging.error(f"Error getting container status -> {e}")
-    all_statuses = pod.status.containerStatuses + pod.status.initContainerStatuses
-    logger.info(f"  pod.status.containerStatuses: {pod.status.containerStatuses}")
-    logger.info(f"  pod.status.initContainerStatuses: {pod.status.initContainerStatuses}")
-    logger.info(f"  all_statuses: {all_statuses}")
 
-    logger.info(f"all statuses: {all_statuses}")
-    log_data = pod.get_logs(
-        filter_regex=params.text_regex,
-    )
-    logger.info(f"pod data: {pod}")
-    logger.info(f"log: {pod.get_logs()}")
-    logger.info(f"log data: {log_data}")
-    if log_data:
+    container_status = pod.status.containerStatuses[0]
+    logger.info(f"Container status -> {container_status}")
+    if not container_status:
+        logger.info(f"No container status for job {job.metadata.namespace}/{job.metadata.name}")
+        return
+
+    message = container_status.state.terminated.message
+    logger.info(f"Message -> {message}")
+    if not message:
+        logger.info(f"No message for job {job.metadata.namespace}/{job.metadata.name}")
+        return
+
+    if "failed to create containerd" in message:
         event.override_finding_attributes(aggregation_key="JobSilence")
-        event.stop_processing = True
+        logger.info(f"Silencing event with log match -> {params.text_regex}")
 
 
 @action
