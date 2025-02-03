@@ -1,3 +1,4 @@
+from ansible_collections.community.general.plugins.modules.rax_files import container
 from robusta.api import (
     action,
     ActionParams,
@@ -16,7 +17,6 @@ from hikaru.model.rel_1_26.v1 import Pod, Job, CronJob
 from typing import Dict, Any, List, Tuple, Union
 from collections import defaultdict
 from string import Template
-from typing import List, Optional
 import logging
 
 
@@ -175,7 +175,11 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
     if not pod:
         logging.info(f"No pods for job {job.metadata.namespace}/{job.metadata.name}")
         return
-
+    try:
+        container_status = pod.status.containerStatuses[0].containerID
+        logger.info(f"container status: {container_status}")
+    except Exception as e:
+        logging.error(f"Error getting container status -> {e}")
     all_statuses = pod.status.containerStatuses + pod.status.initContainerStatuses
     logger.info(f"  pod.status.containerStatuses: {pod.status.containerStatuses}")
     logger.info(f"  pod.status.initContainerStatuses: {pod.status.initContainerStatuses}")
