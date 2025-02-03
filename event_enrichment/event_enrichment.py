@@ -192,6 +192,7 @@ def job_log_match_silence(event: JobEvent, params: JobPodTextMatch):
         finding = Finding(title="JobSilence", description="Silencing job with log match", aggregation_key="JobSilence")
         event.add_finding(finding)
         logger.info(f"Silencing event with log match -> {params.text_regex}")
+        logger.info(f"event -> {event}")
 
 
 @action
