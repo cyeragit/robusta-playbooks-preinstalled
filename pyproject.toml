@@ -5,11 +5,6 @@ description = ""
 authors = ["Daniel Adler <daniela@cyera.io>"]
 readme = "README.md"
 
-[tool.poetry.dependencies]
-python = ">=3.9,<3.12"
-robusta-api = "^0.14.0"
-
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
